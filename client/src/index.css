@@ -24,6 +24,37 @@ body {
   margin: 0;
 }
 
+@media print {
+  body {
+    background: white;
+  }
+
+  .print-report {
+    max-width: none;
+  }
+
+  .print:hidden,
+  aside,
+  header,
+  nav,
+  button,
+  .bg-white\/95,
+  .shadow-pop,
+  .border-line {
+    display: none !important;
+  }
+
+  .print-report .bg-white,
+  .print-report .rounded-xl,
+  .print-report .rounded-2xl,
+  .print-report .border,
+  .print-report .divide-y {
+    box-shadow: none !important;
+    border-color: #dfe5e8 !important;
+    background: white !important;
+  }
+}
+
 button,
 input,
 select,
