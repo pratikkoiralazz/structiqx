@@ -1,0 +1,20 @@
+{
+  "name": "structiqx",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w server\" \"npm run dev -w client\"",
+    "build": "npm run build -w server && npm run build -w client",
+    "db:generate": "npm run prisma:generate -w server",
+    "db:push": "npm run prisma:push -w server",
+    "db:migrate": "npm run prisma:migrate -w server",
+    "db:deploy": "npm run prisma:deploy -w server",
+    "db:seed": "npm run seed -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

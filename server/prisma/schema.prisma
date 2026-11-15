@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationRole {
+  ORGANIZATION_ADMIN
+  PROJECT_MANAGER
+  CIVIL_ENGINEER
+  SITE_ENGINEER
+  SITE_SUPERVISOR
+  ACCOUNTANT
+  CLIENT
+}
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum ProjectCategory {
+  RESIDENTIAL
+  COMMERCIAL
+  ROADS
+  BRIDGES
+  DRAINAGE
+  WATER_SUPPLY
+  IRRIGATION
+  OTHER
+}
+
+model User {
+  id              String               @id @default(uuid()) @db.Uuid
+  email           String               @unique
+  name            String
+  passwordHash    String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  memberships     OrganizationMember[]
+  refreshTokens   RefreshToken[]
+  managedProjects Project[]            @relation("ProjectManager")
+  activities      ActivityLog[]
+}
+
+model Organization {
+  id          String               @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String               @unique
+  currency    String               @default("NPR")
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  members     OrganizationMember[]
+  projects    Project[]
+  activities  ActivityLog[]
+}
+
+model OrganizationMember {
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @db.Uuid
+  organizationId String           @db.Uuid
+  role           OrganizationRole @default(CIVIL_ENGINEER)
+  joinedAt       DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId, role])
+}
+
+model Project {
+  id                    String          @id @default(uuid()) @db.Uuid
+  organizationId        String          @db.Uuid
+  managerId             String?         @db.Uuid
+  code                  String
+  name                  String
+  clientName            String
+  category              ProjectCategory @default(OTHER)
+  description           String?
+  location              String
+  contractValue         Decimal         @default(0) @db.Decimal(14, 2)
+  plannedBudget         Decimal         @default(0) @db.Decimal(14, 2)
+  actualExpenditure     Decimal         @default(0) @db.Decimal(14, 2)
+  progress              Int             @default(0)
+  status                ProjectStatus   @default(PLANNING)
+  startDate             DateTime
+  expectedCompletion    DateTime
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  deletedAt             DateTime?
+  organization          Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  manager               User?           @relation("ProjectManager", fields: [managerId], references: [id], onDelete: SetNull)
+  activities            ActivityLog[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status, deletedAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String    @unique
+  userId    String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model ActivityLog {
+  id             String       @id @default(uuid()) @db.Uuid
+  organizationId String       @db.Uuid
+  projectId      String?      @db.Uuid
+  userId         String?      @db.Uuid
+  action         String
+  description    String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  user           User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+}
