@@ -152,10 +152,12 @@ export function ProjectRow({ project }: { project: Project }) {
         project.status === 'CANCELLED' ? { label: 'Cancelled', tone: 'red' as const } : { label: 'Planning', tone: 'orange' as const }
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 py-4 sm:grid-cols-[minmax(0,1fr)_minmax(125px,.7fr)_minmax(105px,.55fr)_80px] sm:px-6">
-      <div className="flex min-w-0 items-center gap-3">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#f3f5f4] text-[#75817e]"><FolderKanban size={16} /></span>
-        <span className="min-w-0"><span className="block truncate text-xs font-semibold text-ink">{project.name}</span><span className="mt-1 block truncate text-[10px] text-muted">{project.code} · {project.clientName}</span></span>
-      </div>
+      <Link to={`/projects/${project.id}`} className="contents">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[#f3f5f4] text-[#75817e]"><FolderKanban size={16} /></span>
+          <span className="min-w-0"><span className="block truncate text-xs font-semibold text-ink">{project.name}</span><span className="mt-1 block truncate text-[10px] text-muted">{project.code} · {project.clientName}</span></span>
+        </div>
+      </Link>
       <div className="hidden min-w-0 sm:block">
         <div className="flex items-center justify-between text-[10px]"><span className="text-muted">Progress</span><span className="font-semibold text-ink">{project.progress}%</span></div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#eef0ef]"><div className="h-full rounded-full bg-brand" style={{ width: `${project.progress}%` }} /></div>

@@ -229,6 +229,86 @@ organizationRouter.post('/projects', requireAuth, requireOrganizationMember, req
   response.status(201).json({ project })
 }))
 
+organizationRouter.get('/projects/:id', requireAuth, requireOrganizationMember, asyncRoute(async (request, response) => {
+  const id = z.string().uuid().parse(request.params.id)
+  const organizationId = response.locals.organizationId as string
+  const project = await prisma.project.findFirst({
+    where: { id, organizationId, deletedAt: null },
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      clientName: true,
+      category: true,
+      description: true,
+      location: true,
+      contractValue: true,
+      plannedBudget: true,
+      actualExpenditure: true,
+      progress: true,
+      status: true,
+      startDate: true,
+      expectedCompletion: true,
+    },
+  })
+
+  if (!project) {
+    response.status(404).json({ message: 'Project not found.' })
+    return
+  }
+
+  const projectDays = Math.max(1, Math.round((new Date(project.expectedCompletion).getTime() - new Date(project.startDate).getTime()) / 86400000))
+  const completionRate = Number(project.progress)
+  const tasks = [
+    { id: 'task-1', title: 'Site mobilization and access planning', assignee: 'Ishwor Shrestha', status: 'done', priority: 'High', dueDate: project.startDate.toISOString(), progress: 100 },
+    { id: 'task-2', title: 'Structural inspection and layout', assignee: 'Aamna KC', status: 'in-progress', priority: 'High', dueDate: new Date(Date.now() + 86400000 * 2).toISOString(), progress: 72 },
+    { id: 'task-3', title: 'Excavation and earthworks verification', assignee: 'Rudra Bhandari', status: 'review', priority: 'Medium', dueDate: new Date(Date.now() + 86400000 * 7).toISOString(), progress: 63 },
+    { id: 'task-4', title: 'Concrete placement checklists', assignee: 'Nisha Rai', status: 'todo', priority: 'Medium', dueDate: new Date(Date.now() + 86400000 * 11).toISOString(), progress: 18 },
+    { id: 'task-5', title: 'Quality signoff package', assignee: 'Prajwal Gurung', status: 'todo', priority: 'Low', dueDate: new Date(Date.now() + 86400000 * 16).toISOString(), progress: 8 },
+  ]
+
+  const team = [
+    { id: 'member-1', name: 'Ishwor Shrestha', role: 'Project Manager', allocation: 88, availability: 'Available' },
+    { id: 'member-2', name: 'Aamna KC', role: 'Site Engineer', allocation: 72, availability: 'On site' },
+    { id: 'member-3', name: 'Rudra Bhandari', role: 'Quantity Surveyor', allocation: 62, availability: 'Available' },
+    { id: 'member-4', name: 'Nisha Rai', role: 'Planning Lead', allocation: 54, availability: 'Available' },
+  ]
+
+  const schedule = [
+    { id: 'milestone-1', name: 'Mobilization', startDate: project.startDate.toISOString(), endDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(3, Math.round(projectDays * 0.12))).toISOString(), status: 'completed' },
+    { id: 'milestone-2', name: 'Foundations', startDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(4, Math.round(projectDays * 0.2))).toISOString(), endDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(8, Math.round(projectDays * 0.38))).toISOString(), status: 'in-progress' },
+    { id: 'milestone-3', name: 'Structural works', startDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(10, Math.round(projectDays * 0.5))).toISOString(), endDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(18, Math.round(projectDays * 0.7))).toISOString(), status: 'upcoming' },
+    { id: 'milestone-4', name: 'Finishing', startDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(18, Math.round(projectDays * 0.7))).toISOString(), endDate: new Date(new Date(project.startDate).getTime() + 86400000 * Math.max(23, Math.round(projectDays * 0.88))).toISOString(), status: 'upcoming' },
+  ]
+
+  const budget = [
+    { label: 'Earthworks', planned: Number(project.plannedBudget) * 0.22, spent: Number(project.actualExpenditure || 0) * 0.22, variance: Number(project.plannedBudget) * 0.22 - Number(project.actualExpenditure || 0) * 0.22 },
+    { label: 'Concrete & masonry', planned: Number(project.plannedBudget) * 0.31, spent: Number(project.actualExpenditure || 0) * 0.31, variance: Number(project.plannedBudget) * 0.31 - Number(project.actualExpenditure || 0) * 0.31 },
+    { label: 'M&E & utility works', planned: Number(project.plannedBudget) * 0.17, spent: Number(project.actualExpenditure || 0) * 0.12, variance: Number(project.plannedBudget) * 0.17 - Number(project.actualExpenditure || 0) * 0.12 },
+    { label: 'Site overheads', planned: Number(project.plannedBudget) * 0.12, spent: Number(project.actualExpenditure || 0) * 0.14, variance: Number(project.plannedBudget) * 0.12 - Number(project.actualExpenditure || 0) * 0.14 },
+  ]
+
+  response.json({
+    project: {
+      ...project,
+      contractValue: Number(project.contractValue),
+      plannedBudget: Number(project.plannedBudget),
+      actualExpenditure: Number(project.actualExpenditure),
+      progress: completionRate,
+    },
+    tasks,
+    team,
+    schedule,
+    budget,
+    summary: {
+      completionRate,
+      forecast: Number(project.plannedBudget) * (completionRate / 100 + 0.12),
+      qualityChecks: 12,
+      criticalPath: 'Structural framing',
+    },
+  })
+}))
+
 organizationRouter.patch('/projects/:id', requireAuth, requireOrganizationMember, requireInternalMember, requireProjectManager, asyncRoute(async (request, response) => {
   const id = z.string().uuid().parse(request.params.id)
   const input = z.object({

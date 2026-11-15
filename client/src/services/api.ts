@@ -114,6 +114,7 @@ export interface Project {
   code: string
   clientName: string
   category: ProjectCategory
+  description?: string
   location: string
   contractValue: number | string
   plannedBudget: number | string
@@ -149,4 +150,51 @@ export interface ProjectInput {
   plannedBudget: number
   startDate: string
   expectedCompletion: string
+}
+
+export interface ProjectTask {
+  id: string
+  title: string
+  assignee: string
+  status: 'todo' | 'in-progress' | 'review' | 'done'
+  priority: 'Low' | 'Medium' | 'High'
+  dueDate: string
+  progress: number
+}
+
+export interface ProjectTeamMember {
+  id: string
+  name: string
+  role: string
+  allocation: number
+  availability: string
+}
+
+export interface ProjectScheduleItem {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  status: 'completed' | 'in-progress' | 'upcoming'
+}
+
+export interface ProjectBudgetItem {
+  label: string
+  planned: number
+  spent: number
+  variance: number
+}
+
+export interface ProjectDetail {
+  project: Project
+  tasks: ProjectTask[]
+  team: ProjectTeamMember[]
+  schedule: ProjectScheduleItem[]
+  budget: ProjectBudgetItem[]
+  summary: {
+    completionRate: number
+    forecast: number
+    qualityChecks: number
+    criticalPath: string
+  }
 }
