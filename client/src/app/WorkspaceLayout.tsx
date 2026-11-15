@@ -99,6 +99,8 @@ export function WorkspaceLayout() {
           <nav className="space-y-1">
             <NavigationLink to="/" icon={<LayoutDashboard size={17} />} label="Overview" />
             <NavigationLink to="/projects" icon={<FolderKanban size={17} />} label="Projects" />
+            <NavigationLink to="/portal" icon={<Settings2 size={17} />} label="Client portal" />
+            <NavigationLink to="/analytics" icon={<Bell size={17} />} label="Analytics" />
           </nav>
           <p className="px-2 pb-2 pt-8 text-[10px] font-semibold uppercase tracking-[.13em] text-[#9aa2a8]">Manage</p>
           <nav className="space-y-1">
@@ -136,7 +138,7 @@ export function WorkspaceLayout() {
             </Button>
             <div className="hidden items-center gap-2 text-xs text-muted sm:flex">
               <span>{activeOrganization?.name ?? 'Workspace'}</span><span className="text-[#c7cdd0]">/</span>
-              <span className="font-medium text-ink">{location.pathname === '/projects' ? 'Projects' : 'Overview'}</span>
+              <span className="font-medium text-ink">{location.pathname === '/projects' ? 'Projects' : location.pathname === '/portal' ? 'Client portal' : location.pathname === '/analytics' ? 'Analytics' : 'Overview'}</span>
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
@@ -182,6 +184,8 @@ export function WorkspaceLayout() {
             <div className="mb-3 flex items-center gap-2 px-2 text-xs text-muted"><Command size={14} /> {activeOrganization?.name}</div>
             <NavigationLink to="/" icon={<LayoutDashboard size={17} />} label="Overview" />
             <NavigationLink to="/projects" icon={<FolderKanban size={17} />} label="Projects" />
+            <NavigationLink to="/portal" icon={<Settings2 size={17} />} label="Client portal" />
+            <NavigationLink to="/analytics" icon={<Bell size={17} />} label="Analytics" />
           </div>
         )}
 

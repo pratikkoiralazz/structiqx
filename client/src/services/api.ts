@@ -185,12 +185,108 @@ export interface ProjectBudgetItem {
   variance: number
 }
 
+export interface BoqItem {
+  id: string
+  item: string
+  unit: string
+  quantity: number
+  rate: number
+  amount: number
+  category: string
+}
+
+export interface EngineeringCalculation {
+  id: string
+  label: string
+  formula: string
+  value: string
+  note: string
+}
+
+export interface ProcurementItem {
+  id: string
+  item: string
+  supplier: string
+  status: 'Pending' | 'Approved' | 'In transit' | 'Delivered'
+  amount: number
+  eta: string
+}
+
+export interface SiteReport {
+  id: string
+  title: string
+  date: string
+  author: string
+  summary: string
+  weather: string
+  status: 'Good' | 'Caution' | 'Issue'
+}
+
+export interface ProjectDocument {
+  id: string
+  name: string
+  type: string
+  size: string
+  updatedAt: string
+  owner: string
+}
+
+export interface ApprovalItem {
+  id: string
+  title: string
+  reviewer: string
+  status: 'Pending' | 'Approved' | 'Rejected'
+  dueDate: string
+}
+
+export interface ClientPortalUpdate {
+  id: string
+  title: string
+  stage: string
+  summary: string
+  publishedAt: string
+  visibility: 'Public' | 'Private'
+}
+
+export interface AnalyticsMetric {
+  label: string
+  value: string
+  delta: string
+  tone: 'green' | 'amber' | 'red' | 'blue'
+}
+
+export interface PdfExportItem {
+  id: string
+  name: string
+  type: string
+  generatedAt: string
+  status: 'Ready' | 'Processing' | 'Failed'
+}
+
+export interface SecurityCheck {
+  id: string
+  title: string
+  owner: string
+  status: 'Pass' | 'Warning' | 'Review'
+  detail: string
+}
+
 export interface ProjectDetail {
   project: Project
   tasks: ProjectTask[]
   team: ProjectTeamMember[]
   schedule: ProjectScheduleItem[]
   budget: ProjectBudgetItem[]
+  boq: BoqItem[]
+  calculations: EngineeringCalculation[]
+  procurements: ProcurementItem[]
+  siteReports: SiteReport[]
+  documents: ProjectDocument[]
+  approvals: ApprovalItem[]
+  clientPortal: ClientPortalUpdate[]
+  analytics: AnalyticsMetric[]
+  pdfExports: PdfExportItem[]
+  securityChecks: SecurityCheck[]
   summary: {
     completionRate: number
     forecast: number

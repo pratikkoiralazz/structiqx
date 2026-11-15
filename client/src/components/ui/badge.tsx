@@ -7,6 +7,7 @@ const colors = {
   red: 'bg-red-soft text-[#b74e43]',
   gray: 'bg-[#f0f2f3] text-[#6c7780]',
   orange: 'bg-[#fbede6] text-[#c35e31]',
+  blue: 'bg-[#edf4fb] text-[#4a6d90]',
 } as const
 
 export function Badge({

@@ -288,6 +288,81 @@ organizationRouter.get('/projects/:id', requireAuth, requireOrganizationMember, 
     { label: 'Site overheads', planned: Number(project.plannedBudget) * 0.12, spent: Number(project.actualExpenditure || 0) * 0.14, variance: Number(project.plannedBudget) * 0.12 - Number(project.actualExpenditure || 0) * 0.14 },
   ]
 
+  const boq = [
+    { id: 'boq-1', item: 'Excavation and earthworks', unit: 'm3', quantity: 1425.6, rate: 980, amount: 139,  category: 'Civil works' },
+    { id: 'boq-2', item: 'Plain concrete foundation', unit: 'm3', quantity: 318.4, rate: 14500, amount: 4,  category: 'Structural works' },
+    { id: 'boq-3', item: 'Reinforced concrete slab', unit: 'm3', quantity: 460.2, rate: 16800, amount: 7,  category: 'Structural works' },
+    { id: 'boq-4', item: 'Steel reinforcement', unit: 'ton', quantity: 48.5, rate: 185000, amount: 8,  category: 'Structural steel' },
+    { id: 'boq-5', item: 'Brick masonry', unit: 'm2', quantity: 920, rate: 860, amount: 0,  category: 'Finishes' },
+    { id: 'boq-6', item: 'Plumbing and drainage', unit: 'LS', quantity: 1, rate: 620000, amount: 620000, category: 'Utilities' },
+  ]
+
+  boq[0].amount = Number((boq[0].quantity * boq[0].rate).toFixed(2))
+  boq[1].amount = Number((boq[1].quantity * boq[1].rate).toFixed(2))
+  boq[2].amount = Number((boq[2].quantity * boq[2].rate).toFixed(2))
+  boq[3].amount = Number((boq[3].quantity * boq[3].rate).toFixed(2))
+  boq[4].amount = Number((boq[4].quantity * boq[4].rate).toFixed(2))
+  boq[5].amount = Number((boq[5].quantity * boq[5].rate).toFixed(2))
+
+  const calculations = [
+    { id: 'calc-1', label: 'Concrete volume', formula: 'Length × Width × Depth', value: `${(Number(project.plannedBudget) / 17000).toFixed(1)} m³`, note: 'Estimated concrete demand based on the current structural envelope and foundation geometry.' },
+    { id: 'calc-2', label: 'Reinforcement tonnage', formula: 'Steel weight = Volume × Density × Ratio', value: `${(Number(project.plannedBudget) / 550000).toFixed(1)} ton`, note: 'Typical reinforcement tonnage estimate for the current structural design assumptions.' },
+    { id: 'calc-3', label: 'Earthworks balance', formula: 'Cut volume − Fill volume', value: `${(Number(project.contractValue) / 8600).toFixed(1)} m³`, note: 'This represents the estimated excavation surplus or balancing requirement for site staging.' },
+    { id: 'calc-4', label: 'Cost efficiency index', formula: 'Actual expenditure / Planned budget', value: `${((Number(project.actualExpenditure || 0) / Math.max(Number(project.plannedBudget), 1)) * 100).toFixed(1)}%`, note: 'Useful for tracking whether expenditure remains inside the approved budget envelope.' },
+  ]
+
+  const procurements = [
+    { id: 'proc-1', item: 'Cement bags', supplier: 'Himalaya Cement Supply', status: 'Approved', amount: 540000, eta: new Date(Date.now() + 86400000 * 4).toISOString() },
+    { id: 'proc-2', item: 'Steel reinforcement', supplier: 'Metro Steel Traders', status: 'In transit', amount: 1240000, eta: new Date(Date.now() + 86400000 * 9).toISOString() },
+    { id: 'proc-3', item: 'PVC plumbing bundle', supplier: 'Riverline Pipes', status: 'Pending', amount: 360000, eta: new Date(Date.now() + 86400000 * 14).toISOString() },
+    { id: 'proc-4', item: 'Formwork panels', supplier: 'North Valley Build Mart', status: 'Delivered', amount: 470000, eta: new Date(Date.now() + 86400000 * 2).toISOString() },
+  ]
+
+  const siteReports = [
+    { id: 'report-1', title: 'Weekly site condition report', date: new Date(Date.now() - 86400000 * 4).toISOString(), author: 'Aamna KC', summary: 'Site clearance and excavation are progressing according to the workfront program. Temporary drainage remains in place and no critical safety deviations were observed.', weather: 'Sunny, 28°C', status: 'Good' },
+    { id: 'report-2', title: 'Concrete placement inspection', date: new Date(Date.now() - 86400000 * 11).toISOString(), author: 'Rudra Bhandari', summary: 'Concrete mix testing and slump checks showed acceptable consistency, but curing protection needs to be tightened during the next pour cycle.', weather: 'Cloudy, 24°C', status: 'Caution' },
+    { id: 'report-3', title: 'Safety and access review', date: new Date(Date.now() - 86400000 * 17).toISOString(), author: 'Nisha Rai', summary: 'Temporary access barriers were reinforced at the eastern edge of the site. Additional PPE verification is recommended for subcontractor crews.', weather: 'Light rain, 22°C', status: 'Issue' },
+  ]
+
+  const documents = [
+    { id: 'doc-1', name: 'Authority approval set', type: 'PDF', size: '3.2 MB', updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(), owner: 'Project admin' },
+    { id: 'doc-2', name: 'Structural drawings v4', type: 'DWG', size: '18 MB', updatedAt: new Date(Date.now() - 86400000 * 7).toISOString(), owner: 'Design team' },
+    { id: 'doc-3', name: 'Method statement', type: 'DOCX', size: '1.1 MB', updatedAt: new Date(Date.now() - 86400000 * 12).toISOString(), owner: 'Site engineer' },
+    { id: 'doc-4', name: 'Inspection checklist', type: 'XLSX', size: '720 KB', updatedAt: new Date(Date.now() - 86400000 * 18).toISOString(), owner: 'QA/QC' },
+  ]
+
+  const approvals = [
+    { id: 'approval-1', title: 'Material approval – steel reinforcement', reviewer: 'Engineering manager', status: 'Pending', dueDate: new Date(Date.now() + 86400000 * 2).toISOString() },
+    { id: 'approval-2', title: 'Concrete mix review', reviewer: 'QA/QC lead', status: 'Approved', dueDate: new Date(Date.now() - 86400000 * 3).toISOString() },
+    { id: 'approval-3', title: 'Temporary works permit', reviewer: 'Site supervisor', status: 'Pending', dueDate: new Date(Date.now() + 86400000 * 7).toISOString() },
+    { id: 'approval-4', title: 'Progress certificate', reviewer: 'Client representative', status: 'Rejected', dueDate: new Date(Date.now() - 86400000 * 10).toISOString() },
+  ]
+
+  const clientPortal = [
+    { id: 'portal-1', title: 'Quarterly progress summary', stage: 'Progress report', summary: 'The project continues to run on the updated program with minor delays in reinforcement supply that are being mitigated by local procurement adjustments.', publishedAt: new Date(Date.now() - 86400000 * 5).toISOString(), visibility: 'Public' },
+    { id: 'portal-2', title: 'Design clarification issued', stage: 'Design coordination', summary: 'The client has approved the slab edge revisions and the updated drawing package is now available in the shared document set.', publishedAt: new Date(Date.now() - 86400000 * 10).toISOString(), visibility: 'Private' },
+    { id: 'portal-3', title: 'Inspection milestone update', stage: 'Site milestone', summary: 'The first structural inspection cycle passed with minor recommendations that were addressed before the next pour window.', publishedAt: new Date(Date.now() - 86400000 * 18).toISOString(), visibility: 'Public' },
+  ]
+
+  const analytics = [
+    { label: 'Schedule health', value: '92%', delta: '+5%', tone: 'green' },
+    { label: 'Cost variance', value: '-4.8%', delta: '-1.1%', tone: 'amber' },
+    { label: 'Safety incidents', value: '1', delta: '0', tone: 'blue' },
+    { label: 'Client satisfaction', value: '4.7/5', delta: '+0.3', tone: 'green' },
+  ]
+
+  const pdfExports = [
+    { id: 'pdf-1', name: 'Monthly progress report', type: 'Project progress', generatedAt: new Date(Date.now() - 86400000 * 2).toISOString(), status: 'Ready' },
+    { id: 'pdf-2', name: 'Cost variance summary', type: 'Budget review', generatedAt: new Date(Date.now() - 86400000 * 7).toISOString(), status: 'Ready' },
+    { id: 'pdf-3', name: 'Inspection checklist pack', type: 'QA/QC', generatedAt: new Date(Date.now() - 86400000 * 12).toISOString(), status: 'Processing' },
+  ]
+
+  const securityChecks = [
+    { id: 'security-1', title: 'Access control review', owner: 'Project admin', status: 'Pass', detail: 'Role-based permissions are aligned with all active project member access levels.' },
+    { id: 'security-2', title: 'Document retention check', owner: 'PMO lead', status: 'Warning', detail: 'One obsolete file has been flagged for archival to keep approved submissions current.' },
+    { id: 'security-3', title: 'Client communication audit', owner: 'Compliance', status: 'Pass', detail: 'Portal messages and shared reports are logged and retained according to the project workflow policy.' },
+  ]
+
   response.json({
     project: {
       ...project,
@@ -300,6 +375,16 @@ organizationRouter.get('/projects/:id', requireAuth, requireOrganizationMember, 
     team,
     schedule,
     budget,
+    boq,
+    calculations,
+    procurements,
+    siteReports,
+    documents,
+    approvals,
+    clientPortal,
+    analytics,
+    pdfExports,
+    securityChecks,
     summary: {
       completionRate,
       forecast: Number(project.plannedBudget) * (completionRate / 100 + 0.12),

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { request, type Organization, type ProjectDetail } from '@/services/api'
 
-const tabs = ['overview', 'tasks', 'schedule', 'team', 'budget'] as const
+const tabs = ['overview', 'tasks', 'schedule', 'team', 'budget', 'boq', 'engineering', 'procurement', 'site-reports', 'documents', 'approvals', 'client-portal', 'analytics', 'pdf-exports', 'security'] as const
 
 type TabKey = (typeof tabs)[number]
 
@@ -28,6 +28,16 @@ export function ProjectWorkspacePage() {
   const team = detailQuery.data?.team ?? []
   const schedule = detailQuery.data?.schedule ?? []
   const budget = detailQuery.data?.budget ?? []
+  const boq = detailQuery.data?.boq ?? []
+  const calculations = detailQuery.data?.calculations ?? []
+  const procurements = detailQuery.data?.procurements ?? []
+  const siteReports = detailQuery.data?.siteReports ?? []
+  const documents = detailQuery.data?.documents ?? []
+  const approvals = detailQuery.data?.approvals ?? []
+  const clientPortal = detailQuery.data?.clientPortal ?? []
+  const analytics = detailQuery.data?.analytics ?? []
+  const pdfExports = detailQuery.data?.pdfExports ?? []
+  const securityChecks = detailQuery.data?.securityChecks ?? []
 
   const taskStatus = useMemo(() => ({
     todo: tasks.filter((task) => task.status === 'todo').length,
@@ -279,6 +289,228 @@ export function ProjectWorkspacePage() {
           </div>
         </Card>
       )}
+
+      {activeTab === 'boq' && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Bill of quantities</h2>
+              <p className="mt-1 text-xs text-muted">Estimate package for the current scope</p>
+            </div>
+            <Badge tone="orange">{formatCurrency(boq.reduce((sum, item) => sum + item.amount, 0))}</Badge>
+          </div>
+          <div className="hidden grid-cols-[minmax(0,1.5fr)_100px_110px_150px_120px] gap-3 border-b border-line bg-[#fafbfa] px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[.08em] text-[#8b959c] md:grid">
+            <span>Item</span>
+            <span>Unit</span>
+            <span>Qty</span>
+            <span>Rate</span>
+            <span className="text-right">Amount</span>
+          </div>
+          <div className="divide-y divide-line">
+            {boq.map((item) => (
+              <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1.5fr)_100px_110px_150px_120px] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{item.item}</p>
+                  <p className="mt-1 text-[11px] text-muted">{item.category}</p>
+                </div>
+                <div className="text-[11px] text-muted">{item.unit}</div>
+                <div className="text-[11px] text-muted">{formatNumber(item.quantity)}</div>
+                <div className="text-[11px] text-muted">{formatCurrency(item.rate)}</div>
+                <div className="text-right text-sm font-semibold text-ink">{formatCurrency(item.amount)}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'engineering' && (
+        <div className="grid gap-5 xl:grid-cols-2">
+          {calculations.map((calculation) => (
+            <Card key={calculation.id} className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[.12em] text-muted">Engineering check</p>
+                  <h3 className="mt-2 text-lg font-semibold text-ink">{calculation.label}</h3>
+                </div>
+                <Badge tone="blue">{calculation.value}</Badge>
+              </div>
+              <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-muted">Formula</p>
+              <p className="mt-2 text-sm text-ink">{calculation.formula}</p>
+              <p className="mt-5 text-sm leading-6 text-muted">{calculation.note}</p>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'procurement' && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Procurement tracker</h2>
+              <p className="mt-1 text-xs text-muted">Materials and supplier order status</p>
+            </div>
+            <Badge tone="green">{procurements.length} active items</Badge>
+          </div>
+          <div className="divide-y divide-line">
+            {procurements.map((item) => (
+              <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1.4fr)_180px_140px_120px] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{item.item}</p>
+                  <p className="mt-1 text-[11px] text-muted">{item.supplier}</p>
+                </div>
+                <div className="text-[11px] text-muted">ETA {formatDate(item.eta)}</div>
+                <div className="text-[11px] text-muted">{formatCurrency(item.amount)}</div>
+                <Badge tone={procurementTone(item.status)} className="justify-self-start md:justify-self-end">{item.status}</Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'site-reports' && (
+        <div className="grid gap-5 xl:grid-cols-2">
+          {siteReports.map((report) => (
+            <Card key={report.id} className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[.12em] text-muted">{formatDate(report.date)}</p>
+                  <h3 className="mt-2 text-lg font-semibold text-ink">{report.title}</h3>
+                </div>
+                <Badge tone={reportTone(report.status)}>{report.status}</Badge>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted">{report.summary}</p>
+              <div className="mt-5 flex items-center justify-between text-[11px] text-muted">
+                <span>By {report.author}</span>
+                <span>Weather: {report.weather}</span>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'documents' && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Document register</h2>
+              <p className="mt-1 text-xs text-muted">Controlled project files and approvals</p>
+            </div>
+            <Button size="sm">Upload document</Button>
+          </div>
+          <div className="divide-y divide-line">
+            {documents.map((document) => (
+              <div key={document.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1.4fr)_110px_120px_140px] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{document.name}</p>
+                  <p className="mt-1 text-[11px] text-muted">{document.owner}</p>
+                </div>
+                <div className="text-[11px] text-muted">{document.type}</div>
+                <div className="text-[11px] text-muted">{document.size}</div>
+                <div className="text-[11px] text-muted">Updated {formatDate(document.updatedAt)}</div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'approvals' && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Approvals</h2>
+              <p className="mt-1 text-xs text-muted">Pending and completed sign-offs</p>
+            </div>
+            <Badge tone="amber">{approvals.filter((item) => item.status === 'Pending').length} pending</Badge>
+          </div>
+          <div className="divide-y divide-line">
+            {approvals.map((approval) => (
+              <div key={approval.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1.3fr)_160px_130px_120px] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{approval.title}</p>
+                  <p className="mt-1 text-[11px] text-muted">Reviewer: {approval.reviewer}</p>
+                </div>
+                <div className="text-[11px] text-muted">Due {formatDate(approval.dueDate)}</div>
+                <div className="text-[11px] text-muted">{approval.status}</div>
+                <Badge tone={approvalTone(approval.status)} className="justify-self-start md:justify-self-end">{approval.status}</Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'client-portal' && (
+        <div className="grid gap-5 xl:grid-cols-2">
+          {clientPortal.map((update) => (
+            <Card key={update.id} className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[.12em] text-muted">{update.stage}</p>
+                  <h3 className="mt-2 text-lg font-semibold text-ink">{update.title}</h3>
+                </div>
+                <Badge tone={update.visibility === 'Public' ? 'green' : 'gray'}>{update.visibility}</Badge>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted">{update.summary}</p>
+              <p className="mt-5 text-[11px] text-muted">Published {formatDate(update.publishedAt)}</p>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'analytics' && (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {analytics.map((metric) => (
+            <Card key={metric.label} className="p-5">
+              <p className="text-[10px] uppercase tracking-[.12em] text-muted">{metric.label}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <p className="text-[26px] font-semibold tracking-[-.04em] text-ink">{metric.value}</p>
+                <Badge tone={metric.tone}>{metric.delta}</Badge>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {activeTab === 'pdf-exports' && (
+        <Card className="overflow-hidden p-0">
+          <div className="flex items-center justify-between border-b border-line px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">PDF exports</h2>
+              <p className="mt-1 text-xs text-muted">Generated schedules, reports, and approval packages</p>
+            </div>
+            <Button size="sm">Generate PDF</Button>
+          </div>
+          <div className="divide-y divide-line">
+            {pdfExports.map((item) => (
+              <div key={item.id} className="grid gap-3 px-5 py-4 md:grid-cols-[minmax(0,1.5fr)_120px_160px_120px] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{item.name}</p>
+                  <p className="mt-1 text-[11px] text-muted">{item.type}</p>
+                </div>
+                <div className="text-[11px] text-muted">{formatDate(item.generatedAt)}</div>
+                <div className="text-[11px] text-muted">Ready for delivery</div>
+                <Badge tone={pdfTone(item.status)} className="justify-self-start md:justify-self-end">{item.status}</Badge>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {activeTab === 'security' && (
+        <div className="grid gap-5 xl:grid-cols-2">
+          {securityChecks.map((check) => (
+            <Card key={check.id} className="p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[.12em] text-muted">{check.owner}</p>
+                  <h3 className="mt-2 text-lg font-semibold text-ink">{check.title}</h3>
+                </div>
+                <Badge tone={securityTone(check.status)}>{check.status}</Badge>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted">{check.detail}</p>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -375,4 +607,39 @@ function formatDate(value: string) {
 
 function formatCurrency(value: number | string) {
   return new Intl.NumberFormat('en-NP', { style: 'currency', currency: 'NPR', maximumFractionDigits: 0 }).format(Number(value))
+}
+
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('en-NP', { maximumFractionDigits: 2 }).format(value)
+}
+
+function procurementTone(status: string) {
+  if (status === 'Approved') return 'green'
+  if (status === 'Delivered') return 'blue'
+  if (status === 'In transit') return 'amber'
+  return 'gray'
+}
+
+function reportTone(status: string) {
+  if (status === 'Good') return 'green'
+  if (status === 'Caution') return 'amber'
+  return 'red'
+}
+
+function approvalTone(status: string) {
+  if (status === 'Approved') return 'green'
+  if (status === 'Rejected') return 'red'
+  return 'amber'
+}
+
+function pdfTone(status: string) {
+  if (status === 'Ready') return 'green'
+  if (status === 'Processing') return 'amber'
+  return 'red'
+}
+
+function securityTone(status: string) {
+  if (status === 'Pass') return 'green'
+  if (status === 'Warning') return 'amber'
+  return 'red'
 }

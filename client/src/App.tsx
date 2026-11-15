@@ -8,6 +8,8 @@ import { WorkspaceLayout } from '@/app/WorkspaceLayout'
 const DashboardPage = lazy(() => import('@/features/dashboard/DashboardPage').then((module) => ({ default: module.DashboardPage })))
 const ProjectsPage = lazy(() => import('@/features/projects/ProjectsPage').then((module) => ({ default: module.ProjectsPage })))
 const ProjectWorkspacePage = lazy(() => import('@/features/projects/ProjectWorkspacePage').then((module) => ({ default: module.ProjectWorkspacePage })))
+const ClientPortalPage = lazy(() => import('@/features/portal/ClientPortalPage').then((module) => ({ default: module.ClientPortalPage })))
+const AnalyticsPage = lazy(() => import('@/features/analytics/AnalyticsPage').then((module) => ({ default: module.AnalyticsPage })))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +42,8 @@ function ApplicationRoutes() {
         <Route index element={<Suspense fallback={<PageLoading />}><DashboardPage /></Suspense>} />
         <Route path="projects" element={<Suspense fallback={<PageLoading />}><ProjectsPage /></Suspense>} />
         <Route path="projects/:projectId" element={<Suspense fallback={<PageLoading />}><ProjectWorkspacePage /></Suspense>} />
+        <Route path="portal" element={<Suspense fallback={<PageLoading />}><ClientPortalPage /></Suspense>} />
+        <Route path="analytics" element={<Suspense fallback={<PageLoading />}><AnalyticsPage /></Suspense>} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
